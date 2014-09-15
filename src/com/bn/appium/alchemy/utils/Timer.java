@@ -8,12 +8,10 @@ import com.bn.appium.alchemy.manager.TestManager;
  */
 public class Timer {
 
-    public static final long MINUTE = 60000;
+    public static long TIMEOUT = 60000;
 
     public static long getTimeout(){
         long diff = (System.currentTimeMillis() - MainConstants.TIME_START_TEST);
-        if(diff < 0)
-            return TestManager.mTimeout;
         return TestManager.mTimeout - diff;
     }
 

@@ -6,9 +6,6 @@ import net.bugs.testhelper.view.View;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
 import com.bn.appium.alchemy.utils.*;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.Augmenter;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -22,6 +19,11 @@ import static com.bn.appium.alchemy.utils.LoggerUtils.i;
  */
 public class TestManager {
     private static volatile TestManager instance;
+
+    public static void setDriver(AppiumDriver driver) {
+        TestManager.driver = driver;
+    }
+
     public static enum Platform {Android, iOs, None};
     public static Platform currentPlatform = Platform.None;
 
@@ -36,7 +38,7 @@ public class TestManager {
     private static String mArgTimeout = null;
     private static long mLastDumpTime = 0;
     private static boolean isAccuracy = false;
-    public static int mTimeout;
+    public static long mTimeout;
     private boolean isStopErrorHandler = true;
     public static ArrayList<String> itemsName = new ArrayList<String>();
     public static Device mDevice;
@@ -45,8 +47,7 @@ public class TestManager {
     public static ConfigManager configManager = null;
     private static AppiumDriver driver;
 
-    private TestManager(String buildID, String deviceID, AppiumDriver appiumDriver) {
-        driver = appiumDriver;
+    private TestManager(String buildID, String deviceID) {
         configManager = new ConfigManager();
         currentPlatform = getCurrentPlatform(configManager);
 
@@ -56,8 +57,8 @@ public class TestManager {
     }
 
     public static TestManager getInstance(final String buildId, final String login, final String password,
-                                          final String deviceId, final String hwDevice, final String timeout,
-                                          AppiumDriver driver){
+                                          final String deviceId, final String hwDevice, final String timeout
+                                          ){
         mArgTimeout = timeout;
         mDeviceId = deviceId;
         mHwDevice = hwDevice;
@@ -67,7 +68,7 @@ public class TestManager {
         if(instance == null)
             synchronized (TestManager.class){
                 if(instance == null)
-                    instance = new TestManager(mBuildId, mDeviceId, driver);
+                    instance = new TestManager(mBuildId, mDeviceId);
             }
         return instance;
     }
@@ -83,8 +84,8 @@ public class TestManager {
         return Platform.None;
     }
 
-    public static TestManager getInstance(AppiumDriver driver){
-        return getInstance(mBuildId, mLogin, mPassword, mDeviceId, mHwDevice, mArgTimeout, driver);
+    public static TestManager getInstance(){
+        return getInstance(mBuildId, mLogin, mPassword, mDeviceId, mHwDevice, mArgTimeout);
     }
 
     public static void stopApplication(String $package){
@@ -274,6 +275,16 @@ public class TestManager {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public static int detectTestType(String testArg){
+        int detectedTestType = 0;
+
+        if (testArg.equals("testoobe"))
+            detectedTestType = MainConstants.TestType.Kpi.TEST_OOBE;
+        if (testArg.equals("testsearch"))
+            detectedTestType = MainConstants.TestType.Kpi.TEST_SEARCH;
+        return detectedTestType;
     }
 
     @Deprecated

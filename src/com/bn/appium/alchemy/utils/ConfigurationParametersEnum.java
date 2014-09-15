@@ -22,6 +22,7 @@ public enum ConfigurationParametersEnum {
     TIMEOUT,
     SYNC_COMPLETE,
 
+    BOOK_NAME,
     DATE_FIELD_NAME,
     TIME_FIELD_NAME,
     BUILD_FIELD_NAME,

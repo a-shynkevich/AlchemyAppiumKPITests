@@ -18,15 +18,15 @@ public class ConfigManager {
 
     public String getProperty(String configName){
         String property =  propertiesManager.getProperty(configName);
-        System.out.println("Property:" + property);
+        System.out.println("Property:" + property + " " + configName);
         return property;
     }
 
-    public int getTimeout(){
+    public long getTimeout(){
         String line = getProperty(ConfigurationParametersEnum.TIMEOUT.name());
-        int timeout;
+        long timeout;
         try{
-            timeout = Integer.parseInt(line);
+            timeout = Long.parseLong(line);
         }catch (Throwable ex){
             e("Used default timeout = " + MainConstants.DEFAULT_TIMEOUT + ex.getMessage());
             timeout = MainConstants.DEFAULT_TIMEOUT;
