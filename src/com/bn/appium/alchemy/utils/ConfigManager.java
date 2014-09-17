@@ -18,7 +18,7 @@ public class ConfigManager {
 
     public String getProperty(String configName){
         String property =  propertiesManager.getProperty(configName);
-        System.out.println("Property:" + property + " " + configName);
+        System.out.println("Property:" + configName + " : " + property);
         return property;
     }
 

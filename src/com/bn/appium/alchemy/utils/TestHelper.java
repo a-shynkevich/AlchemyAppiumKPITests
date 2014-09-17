@@ -3,7 +3,6 @@ package com.bn.appium.alchemy.utils;
 import com.bn.appium.alchemy.manager.TestManager;
 import io.appium.java_client.AppiumDriver;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -45,15 +44,23 @@ public class TestHelper {
         }).start();
     }
 
-    public WebElement findElement (By byElement){
+
+
+
+    public WebElement findElement (By byElement, boolean isElementDisplayed){
         WebElement element = null;
         try {
             element = driver.findElement(byElement);
         }catch (Exception e) {
             return null;
         }
-        if(!element.isDisplayed()){
+        if(!element.isEnabled()){
             return null;
+        }
+        if(isElementDisplayed) {
+            if (!element.isDisplayed()) {
+                return null;
+            }
         }
         return element;
     }
@@ -76,9 +83,9 @@ public class TestHelper {
         long waiterStartTime = System.currentTimeMillis();
         long startTime = 0;
 
-        while (isElementPresent(by)){
-            if (System.currentTimeMillis() - startTime > 1000) {
-                log("wait while element by "+by.toString() + "is present.");
+        while (findElement(by, true) != null){
+            if (System.currentTimeMillis() - startTime > 100) {
+                log("wait while element by "+by.toString() + " is present.");
                 startTime = System.currentTimeMillis();
             }
             if (System.currentTimeMillis() - waiterStartTime >= waitTimeMs){
@@ -88,11 +95,11 @@ public class TestHelper {
         return true;
     }
 
-    protected WebElement waitForElement(final By by, long timeMs) {
+    protected WebElement waitForElement(final By by, long timeMs, boolean isElementDisplayed) {
         long waiterStartTime = System.currentTimeMillis();
         long startTime = 0;
 
-        WebElement element = findElement(by);
+        WebElement element = findElement(by, isElementDisplayed);
         while (element == null){
             if (System.currentTimeMillis() - startTime > 1000) {
                 log("wait element by: \"" + by.toString() + "\".");
@@ -102,10 +109,53 @@ public class TestHelper {
                 log("element by: \"" + by.toString() + "\" was not found.");
                 return null;
             }
-            element = findElement(by);
+            element = findElement(by, isElementDisplayed);
         }
 
         return element;
+    }
+
+    protected WebElement waitForElement(final By firstBy, final By secondBy, long timeMs, boolean isElementDisplayed) {
+        long waiterStartTime = System.currentTimeMillis();
+        long startTime = 0;
+
+        WebElement element = findElement(firstBy, isElementDisplayed);
+        WebElement element1 = findElement(secondBy, isElementDisplayed);
+
+        while (element == null && element1 == null){
+            if (System.currentTimeMillis() - startTime > 1000) {
+                log("wait elements by: \"" + firstBy.toString() + "\" or +" +secondBy.toString() +".");
+                startTime = System.currentTimeMillis();
+            }
+            if (System.currentTimeMillis() - waiterStartTime >= timeMs){
+                log("elements by: \"" + firstBy.toString() + "\"" + secondBy.toString() + "was not found.");
+                return null;
+            }
+            element = findElement(firstBy, isElementDisplayed);
+            element1 = findElement(secondBy, isElementDisplayed);
+        }
+        if(element != null){
+            return element;
+        }else
+            if(element1 != null){
+                return element1;
+            }
+        return null;
+    }
+
+    protected WebElement waitForElement(final By by, int index, long timeMs) {
+        WebDriverWait wait = new WebDriverWait(driver, timeMs/1000);
+        WebElement element;
+        try {
+            List <WebElement> elements = wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(by));
+            element = elements.get(index);
+            if(element.isDisplayed()){
+                return element;
+            }
+        }catch (Exception e){
+            log("element by: \"" + by.toString() + "\" was not found.");
+            return null;
+        }return null;
     }
 
     protected WebElement getWebElement(By by){

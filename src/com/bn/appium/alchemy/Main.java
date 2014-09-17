@@ -1,5 +1,7 @@
 package com.bn.appium.alchemy;
 
+import com.bn.appium.alchemy.ios.AllKPITests;
+import com.bn.appium.alchemy.ios.TestOpenBook;
 import com.bn.appium.alchemy.ios.TestOobe;
 import com.bn.appium.alchemy.ios.TestSearch;
 import com.bn.appium.alchemy.manager.TestManager;
@@ -11,8 +13,6 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by nikolai on 25.07.2014.
@@ -58,11 +58,20 @@ public class Main {
         String testType = args[0].toString().toLowerCase();
 
         switch (TestManager.detectTestType(testType)) {
+            case MainConstants.TestType.Kpi.ALL_KPI_TESTS:
+                (new AllKPITests(driver)).runAllKpiTests();
+                break;
             case MainConstants.TestType.Kpi.TEST_OOBE:
                 (new TestOobe(driver)).login();
                 break;
             case MainConstants.TestType.Kpi.TEST_SEARCH:
                 (new TestSearch(driver)).searchBook();
+                (new TestSearch(driver)).goToHome();
+                break;
+            case MainConstants.TestType.Kpi.TEST_OPEN_BOOK:
+                (new TestOpenBook(driver)).loadBook();
+                (new TestOpenBook(driver)).readBook();
+                (new TestOpenBook(driver)).goToHome();
                 break;
         }
 

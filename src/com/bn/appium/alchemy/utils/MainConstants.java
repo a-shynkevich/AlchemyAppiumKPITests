@@ -20,20 +20,28 @@ public class MainConstants {
     public static class TestType {
         public static final String testOobe = "testOobe";
         public static final String testSearch = "testSearch";
+        public static final String testOpenBook = "testOpenBook";
 
         public static class Kpi {
             public static final String[] allTests = new String[]{
                     "testOobe",
-                    "testSearch"
+                    "testSearch",
+                    "testOpenBook"
+
             };
+            public static final int ALL_KPI_TESTS = -1;
             public static final int TEST_OOBE = 0;
             public static final int TEST_SEARCH = 1;
+            public static final int TEST_OPEN_BOOK = 2;
 
 
             public class TestAction {
                 public static final String FIRST_SYNC = "FirstSync";
                 public static final String FULL_SYNC = "FullSync";
                 public static final String SEARCH = "SearchSync";
+                public static final String DOWNLOAD = "Download";
+                public static final String READ_BOOK = "ReadBook";
+
             }
         }
     }

@@ -98,11 +98,11 @@ public class TestManager {
 
     public static ItemLog addLogParams(Date date, String testAction, String testData, boolean testResult){
         ItemLog itemLog = new ItemLog(testHelper);
-        itemLog.setBuild(mDeviceId != null ? mDevice.build : "");
-        itemLog.setDeviceId(mDeviceId != null ? mDevice.deviceId : "");
+        itemLog.setBuild(TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_APP.name()));
+        itemLog.setDeviceId(TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_DEVICE_ID.name()));
         itemLog.setNet(mDeviceId != null ? mDevice.network : "");
-        itemLog.setHw(mDeviceId != null ? mDevice.hwDevice : "");
-        itemLog.setOs(mDeviceId != null ? mDevice.osDevice : "");
+        itemLog.setHw(TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_DEVICE.name()));
+        itemLog.setOs(TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_PLATFORM_VERSION.name()));
         itemLog.setSlaveId(mDeviceId != null ? mDevice.os_system : "");
         itemLog.setDate(date, "");
         itemLog.setTime(date, "");
@@ -280,10 +280,15 @@ public class TestManager {
     public static int detectTestType(String testArg){
         int detectedTestType = 0;
 
+        if (testArg.equals("allkpitests"))
+            detectedTestType = MainConstants.TestType.Kpi.ALL_KPI_TESTS;
         if (testArg.equals("testoobe"))
             detectedTestType = MainConstants.TestType.Kpi.TEST_OOBE;
         if (testArg.equals("testsearch"))
             detectedTestType = MainConstants.TestType.Kpi.TEST_SEARCH;
+        if (testArg.equals("testopenbook"))
+            detectedTestType = MainConstants.TestType.Kpi.TEST_OPEN_BOOK;
+
         return detectedTestType;
     }
 

@@ -23,6 +23,7 @@ public enum ConfigurationParametersEnum {
     SYNC_COMPLETE,
 
     BOOK_NAME,
+    LOAD_BOOK_NAME,
     DATE_FIELD_NAME,
     TIME_FIELD_NAME,
     BUILD_FIELD_NAME,
