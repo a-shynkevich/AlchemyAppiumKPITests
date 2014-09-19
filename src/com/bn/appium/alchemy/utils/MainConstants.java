@@ -33,14 +33,26 @@ public class MainConstants {
             public static final int TEST_OOBE = 0;
             public static final int TEST_SEARCH = 1;
             public static final int TEST_OPEN_BOOK = 2;
+            public static final int TEST_OPEN_COMICS = 3;
+            public static final int TEST_OPEN_MAGAZINES = 4;
+            public static final int TEST_OPEN_WOODWIN = 5;
+            public static final int TEST_OPEN_FAVA = 6;
+            public static final int TEST_OPEN_PDF = 7;
+            public static final int TEST_OPEN_NEWSPAPER = 8;
+            public static final int TEST_OPEN_CATALOG = 9;
+            public static final int TEST_ALL_KPI_BOOKS =10;
+
+
+
 
 
             public class TestAction {
                 public static final String FIRST_SYNC = "FirstSync";
                 public static final String FULL_SYNC = "FullSync";
-                public static final String SEARCH = "SearchSync";
+                public static final String FIRTS_SEARCH_SYNC = "FirstSearchSync";
+                public static final String FULL_SEARCH_SYNC = "FullSearchSync";
                 public static final String DOWNLOAD = "Download";
-                public static final String READ_BOOK = "ReadBook";
+                public static final String COLD_OPEN = "ReadBook";
 
             }
         }

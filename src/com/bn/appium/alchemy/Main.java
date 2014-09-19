@@ -1,11 +1,12 @@
 package com.bn.appium.alchemy;
 
-import com.bn.appium.alchemy.ios.AllKPITests;
-import com.bn.appium.alchemy.ios.TestOpenBook;
+import com.bn.appium.alchemy.ios.TestAllKpiBooks;
+import com.bn.appium.alchemy.ios.TestOpenProduct;
 import com.bn.appium.alchemy.ios.TestOobe;
 import com.bn.appium.alchemy.ios.TestSearch;
 import com.bn.appium.alchemy.manager.TestManager;
 import com.bn.appium.alchemy.utils.ConfigurationParametersEnum;
+import com.bn.appium.alchemy.utils.InstallerTestParams;
 import com.bn.appium.alchemy.utils.MainConstants;
 import io.appium.java_client.AppiumDriver;
 import org.openqa.selenium.remote.CapabilityType;
@@ -22,19 +23,18 @@ public class Main {
     private static AppiumDriver driver;
     private static TestManager testManager;
     private static void setUp() throws Exception {
-        testManager = TestManager.getInstance();
 
-        Thread.sleep(5000);
+
         DesiredCapabilities capabilities = new DesiredCapabilities();
-        File appDir = new File(TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_APP_DIR.name()));
-        File app = new File(appDir, TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_APP.name()));
+        File appDir = new File(TestManager.configManager.getProperty(ConfigurationParametersEnum.BUILD_DIR.name()));
+        File app = new File(appDir, TestManager.getBuildName());
         capabilities.setCapability(CapabilityType.BROWSER_NAME, "");
-        capabilities.setCapability("platformVersion", TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_PLATFORM_VERSION.name()));
-        capabilities.setCapability("platformName", TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_PLATFORM_NAME.name()));
-        String deviceName = TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_DEVICE.name());
-        capabilities.setCapability("deviceName",deviceName);
+        capabilities.setCapability("platformVersion", TestManager.getOsDevice());
+        capabilities.setCapability("platformName", TestManager.getOs_system());
+        String deviceName = TestManager.getHwDevice();
+        capabilities.setCapability("deviceName", deviceName);
         if(!deviceName.toLowerCase().contains("simulator")){
-            capabilities.setCapability("udid", TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_DEVICE_ID.name()));
+            capabilities.setCapability("udid", TestManager.getDeviceId());
         }
 //        capabilities.setCapability("bundleid", configManager.getProperty(ConfigurationParametersEnum.IOS_DEVICE_ID.name()));
         capabilities.setCapability("app",app.getAbsolutePath());
@@ -53,25 +53,60 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
+
+            testManager =TestManager.getInstance(args);
+
         setUp();
-
-        String testType = args[0].toString().toLowerCase();
-
-        switch (TestManager.detectTestType(testType)) {
+        MainConstants.TIME_START_TEST = System.currentTimeMillis();
+        switch (TestManager.detectTestType(MainConstants.TEST_NAME)) {
             case MainConstants.TestType.Kpi.ALL_KPI_TESTS:
-                (new AllKPITests(driver)).runAllKpiTests();
+//                (new TestAllKpiBooks(driver)).runAllKpiTests();
                 break;
             case MainConstants.TestType.Kpi.TEST_OOBE:
                 (new TestOobe(driver)).login();
                 break;
             case MainConstants.TestType.Kpi.TEST_SEARCH:
-                (new TestSearch(driver)).searchBook();
-                (new TestSearch(driver)).goToHome();
+                (new TestSearch(driver)).searchBook(TestManager.configManager.getProperty(ConfigurationParametersEnum.SEARCH_BOOK_NAME.name()));
+                (new TestSearch(driver)).returnDefaultState();
                 break;
             case MainConstants.TestType.Kpi.TEST_OPEN_BOOK:
-                (new TestOpenBook(driver)).loadBook();
-                (new TestOpenBook(driver)).readBook();
-                (new TestOpenBook(driver)).goToHome();
+                InstallerTestParams bookInstaller = new InstallerTestParams();
+                bookInstaller.setParametersOpenBook();
+                TestOpenProduct testOpenBook = new TestOpenProduct(driver, bookInstaller.getTestParameter());
+                testOpenBook.start();
+                break;
+            case MainConstants.TestType.Kpi.TEST_OPEN_COMICS:
+                InstallerTestParams comicsInstaller = new InstallerTestParams();
+                comicsInstaller.setParametersOpenComics();
+                TestOpenProduct testOpenComics = new TestOpenProduct(driver, comicsInstaller.getTestParameter());
+                testOpenComics.start();
+                break;
+            case MainConstants.TestType.Kpi.TEST_OPEN_MAGAZINES:
+                InstallerTestParams magazineInstaller = new InstallerTestParams();
+                magazineInstaller.setParametersOpenMagazines();
+                TestOpenProduct testOpenMagazine = new TestOpenProduct(driver, magazineInstaller.getTestParameter());
+                testOpenMagazine.start();
+                break;
+            case MainConstants.TestType.Kpi.TEST_OPEN_WOODWIN:
+                InstallerTestParams woodwinInstaller = new InstallerTestParams();
+                woodwinInstaller.setParametersOpenWoodwin();
+                TestOpenProduct testOpenWoodwin = new TestOpenProduct(driver, woodwinInstaller.getTestParameter());
+                testOpenWoodwin.start();
+                break;
+            case MainConstants.TestType.Kpi.TEST_OPEN_FAVA:
+                break;
+            case MainConstants.TestType.Kpi.TEST_OPEN_PDF:
+                InstallerTestParams pdfInstaller = new InstallerTestParams();
+                pdfInstaller.setParametersOpenPdf();
+                TestOpenProduct testOpenPdf = new TestOpenProduct(driver, pdfInstaller.getTestParameter());
+                testOpenPdf.start();
+                break;
+            case MainConstants.TestType.Kpi.TEST_OPEN_NEWSPAPER:
+                break;
+            case MainConstants.TestType.Kpi.TEST_OPEN_CATALOG:
+                break;
+            case MainConstants.TestType.Kpi.TEST_ALL_KPI_BOOKS:
+                new TestAllKpiBooks(driver).runAllKpiTests();
                 break;
         }
 

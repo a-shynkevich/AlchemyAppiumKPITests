@@ -12,7 +12,7 @@ public class Timer {
 
     public static long getTimeout(){
         long diff = (System.currentTimeMillis() - MainConstants.TIME_START_TEST);
-        return TestManager.mTimeout - diff;
+        return TestManager.getTimeout() - diff;
     }
 
 }

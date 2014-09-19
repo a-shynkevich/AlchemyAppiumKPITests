@@ -1,17 +1,13 @@
 package com.bn.appium.alchemy.manager;
 
 import io.appium.java_client.AppiumDriver;
-import net.bugs.testhelper.TestHelper;
-import net.bugs.testhelper.view.View;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
 import com.bn.appium.alchemy.utils.*;
-
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
-
+import static com.bn.appium.alchemy.utils.LoggerUtils.e;
 import static com.bn.appium.alchemy.utils.LoggerUtils.i;
 
 /**
@@ -24,86 +20,113 @@ public class TestManager {
         TestManager.driver = driver;
     }
 
-    public static enum Platform {Android, iOs, None};
-    public static Platform currentPlatform = Platform.None;
-
-    private static TestHelper testHelper;
     private static FileWorker fileWorker;
     private static FileWorker fileLogWorker;
-    private static String mDeviceId = null;
-    private static String mBuildId = null;
-    private static String mLogin = null;
-    private static String mPassword = null;
-    private static String mHwDevice = null;
-    private static String mArgTimeout = null;
+    private static String deviceId = null;
+    private static String buildName = null;
+    private static String network = null;
+    private static String os_system = null;
+    private static String hwDevice = null;
+    private static String osDevice = null;
+    private static String dumpKpiInfo = null;
+    private static String account = null;
+    private static String password = null;
+    private static int timeout = 0;
+    private static String[] args = null;
     private static long mLastDumpTime = 0;
-    private static boolean isAccuracy = false;
-    public static long mTimeout;
-    private boolean isStopErrorHandler = true;
-    public static ArrayList<String> itemsName = new ArrayList<String>();
-    public static Device mDevice;
+
     private static long mStartTime = 0;
     private static long mEndTime = 0;
     public static ConfigManager configManager = null;
     private static AppiumDriver driver;
 
-    private TestManager(String buildID, String deviceID) {
+    private TestManager(String[] args) {
+        this.args = args;
         configManager = new ConfigManager();
-        currentPlatform = getCurrentPlatform(configManager);
-
-        mTimeout = configManager.getTimeout();
+        init();
         fileWorker = new FileWorker();
         fileLogWorker = new FileWorker(MainConstants.FILE_NAME_LOG_TESTS);
     }
 
-    public static TestManager getInstance(final String buildId, final String login, final String password,
-                                          final String deviceId, final String hwDevice, final String timeout
-                                          ){
-        mArgTimeout = timeout;
-        mDeviceId = deviceId;
-        mHwDevice = hwDevice;
-        mBuildId = buildId;
-        mLogin = login;
-        mPassword = password;
+
+
+    public void init(){
+        if (args.length > 0)
+            MainConstants.TEST_NAME = args[0].toString();
+        if (args.length > 1) {
+            dumpKpiInfo = args[1].toString();
+        }else {
+            dumpKpiInfo = configManager.getProperty(ConfigurationParametersEnum.DUMP_KPI_INFO.name());
+        }
+        if (args.length > 2){
+            deviceId = args[2].toString();
+        }else {
+            deviceId = configManager.getProperty(ConfigurationParametersEnum.IOS_DEVICE_ID.name());
+        }
+        if (args.length > 3){
+            buildName = args[3].toString();
+        }else {
+            buildName = configManager.getProperty(ConfigurationParametersEnum.BUILD_NAME.name());
+        }
+        if(args.length > 4){
+            hwDevice = args[4].toString();
+        }else{
+            hwDevice = configManager.getProperty(ConfigurationParametersEnum.IOS_DEVICE.name());
+        }
+        if (args.length > 5){
+            account = args[5].toString();
+        }else {
+            account = configManager.getProperty(ConfigurationParametersEnum.LOGIN.name());
+        }
+        if (args.length > 6){
+            password = args[6].toString();
+        }else{
+            password = configManager.getProperty(ConfigurationParametersEnum.PASSWORD.name());
+        }
+        if (args.length > 7){
+            parseTimeout(args[7].toString());
+        }else{
+            parseTimeout(TestManager.configManager.getProperty(ConfigurationParametersEnum.TIMEOUT.name()));
+        }
+
+        network = "";
+//        todo write getOsSystem method
+        os_system = TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_PLATFORM_NAME.name());
+        osDevice = TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_PLATFORM_VERSION.name());
+
+    }
+
+    private void parseTimeout(String line){
+        try{
+            timeout = Integer.parseInt(line);
+        }catch (Throwable ex){
+            e("Used default timeout = " + MainConstants.DEFAULT_TIMEOUT + ex.getMessage());
+            timeout = MainConstants.DEFAULT_TIMEOUT;
+        }
+    }
+
+    public static TestManager getInstance(String[] args){
         if(instance == null)
             synchronized (TestManager.class){
                 if(instance == null)
-                    instance = new TestManager(mBuildId, mDeviceId);
+                    instance = new TestManager(args);
             }
         return instance;
     }
 
-    public static Platform getCurrentPlatform(ConfigManager configManager){
-        String mobilePlatform = configManager.getProperty(ConfigurationParametersEnum.MOBILE_PLATFORM.name());
-        if(mobilePlatform == null || mobilePlatform.isEmpty())
-            return Platform.None;
-        if(mobilePlatform.toLowerCase().equals("android"))
-            return Platform.Android;
-        if(mobilePlatform.toLowerCase().equals("com/bn/appium/alchemy/ios"))
-            return Platform.iOs;
-        return Platform.None;
-    }
-
     public static TestManager getInstance(){
-        return getInstance(mBuildId, mLogin, mPassword, mDeviceId, mHwDevice, mArgTimeout);
+        return getInstance(args);
     }
 
-    public static void stopApplication(String $package){
-        testHelper.executeShellCommand(" am force-stop " + $package, testHelper.defaultCallBack);
-    }
-
-    public static void runAppIntent(String intent){
-        testHelper.executeShellCommand(" am start -n " + intent, testHelper.defaultCallBack);
-    }
 
     public static ItemLog addLogParams(Date date, String testAction, String testData, boolean testResult){
-        ItemLog itemLog = new ItemLog(testHelper);
-        itemLog.setBuild(TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_APP.name()));
-        itemLog.setDeviceId(TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_DEVICE_ID.name()));
-        itemLog.setNet(mDeviceId != null ? mDevice.network : "");
-        itemLog.setHw(TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_DEVICE.name()));
-        itemLog.setOs(TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_PLATFORM_VERSION.name()));
-        itemLog.setSlaveId(mDeviceId != null ? mDevice.os_system : "");
+        ItemLog itemLog = new ItemLog();
+        itemLog.setBuild(getBuildName());
+        itemLog.setDeviceId(getDeviceId());
+        itemLog.setNet(getNetwork());
+        itemLog.setHw(getHwDevice());
+        itemLog.setOs(getOsDevice());
+        itemLog.setSlaveId("");
         itemLog.setDate(date, "");
         itemLog.setTime(date, "");
         itemLog.setStartTime(mStartTime);
@@ -115,45 +138,6 @@ public class TestManager {
         return itemLog;
     }
 
-    private void setupItemsName() {
-        File file = new File(MainConstants.PATH_TO_ITEMS_NAME);
-        if(!file.exists()) {
-            if(testHelper != null)
-                testHelper.i("file doesn't exist");
-            return;
-        }
-        FileReader fileReader = null;
-        BufferedReader bufferedReader = null;
-        try {
-            fileReader = new FileReader(file);
-            bufferedReader = new BufferedReader(fileReader);
-            String line = null;
-            while ((line = bufferedReader.readLine()) != null){
-                line = line.trim();
-                if(line.startsWith("#")) continue;
-                itemsName.add(line.trim());
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        finally {
-            try {
-                if(bufferedReader != null)
-                    bufferedReader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                if(fileReader != null)
-                    fileReader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     public static int generateRandom(int n){
         if(n == 0)
             return 0;
@@ -161,51 +145,8 @@ public class TestManager {
     }
 
     public static void write(ItemLog itemLog){
-        fileLogWorker.writeLog(itemLog);
-    }
-
-    public static Date write(String text){
-        if(testHelper != null)
-            testHelper.i(">>>>>>>>>>>>>>> TEST STEP: " + text);
-        return fileWorker.write(text);
-    }
-
-    public TestHelper getTestHelper() {
-        return testHelper;
-    }
-
-    public void startErrorHandler(final boolean isStrictMode, final boolean isTakeScreenShot){
-        if(!isStopErrorHandler) return;
-        isStopErrorHandler = false;
-        new Thread(new Runnable() {
-            public void run() {
-                while (!isStopErrorHandler){
-                    ArrayList<View> views = testHelper.getAllViews(false);
-                    testHelper.sleep(1, false);
-                    if(views == null || views.size() == 0) continue;
-                    View synchronizeLibraryError = testHelper.getViewByText(Errors.Strings.SYNCHRONIZE_LIBRARY_ERROR_TITLE, true, 0, false);
-                    View unknownError = testHelper.getViewByText(Errors.Strings.UNKNOWN_ERROR_TITLE, true, 0, false);
-                    String textError = null;
-                    if((synchronizeLibraryError != null && synchronizeLibraryError.exists() && (textError = synchronizeLibraryError.getText()) != null) ||
-                            (unknownError != null && unknownError.exists() && (textError = unknownError.getText()) != null)) {
-                        if(isStrictMode) System.exit(0);
-                        Date date = write("ERROR: " + textError);
-                        if(isTakeScreenShot){
-                            testHelper.takeScreenshot(testHelper.getStringFromDate(date, MainConstants.TIME_FORMAT) + testHelper.getFieldNameInClassByValue(Errors.Strings.class, textError), MainConstants.PATH_TO_SCREENSHOTS);
-                        }
-                        View ok = testHelper.getViewByText(Errors.Strings.ERROR_OK, true, 0, false);
-                        if(ok != null && ok.exists()){
-                            ok.click();
-                            testHelper.sleep(5000);
-                        }
-                    }
-                }
-            }
-        }).start();
-    }
-
-    public void stopErrorHandler() {
-        isStopErrorHandler = true;
+        if(TestManager.configManager.getProperty(ConfigurationParametersEnum.DUMP_KPI_INFO.name()).equals("true"))
+            fileLogWorker.writeLog(itemLog);
     }
 
     public static void captureScreenshot(String testName) {
@@ -231,30 +172,11 @@ public class TestManager {
 //        }
     }
 
-    public static class Errors {
-        public static class Strings {
-            public static final String SYNCHRONIZE_LIBRARY_ERROR_TITLE = "Problem occurred while trying to synchronize library. Please try again later.";
-            public static final String UNKNOWN_ERROR_TITLE = "Unknown error";
-            public static final String ERROR_OK = "OK";
-        }
-    }
-
-    public static void pressBack(){
-        testHelper.pressBack();
-    }
-
     private static void timer(boolean isStart){
         long time = System.currentTimeMillis();
-        if(testHelper != null)
-            testHelper.i(String.format ((isStart ? "timer started at %s" : "timer stopped at %s, total time: %s"), testHelper.getStringFromDate(new Date(time), "HH:mm:ss.SSS") + "", (time - mStartTime) + ""));
         if(isStart)
             mStartTime = time;
         else{
-            if(isAccuracy){
-                mLastDumpTime = testHelper.getLastDumpTotalTime();
-                if(testHelper != null)
-                    testHelper.i("Time dump: " + mLastDumpTime);
-            }
             mEndTime = time;
         }
     }
@@ -264,8 +186,6 @@ public class TestManager {
     }
 
     public static void stopTimer(boolean accuracy){
-        isAccuracy = accuracy;
-        mLastDumpTime = 0;
         timer(false);
     }
 
@@ -280,21 +200,79 @@ public class TestManager {
     public static int detectTestType(String testArg){
         int detectedTestType = 0;
 
-        if (testArg.equals("allkpitests"))
+        if (testArg.equals("testAllKpiBooks"))
             detectedTestType = MainConstants.TestType.Kpi.ALL_KPI_TESTS;
-        if (testArg.equals("testoobe"))
+        if (testArg.equals("testOobe"))
             detectedTestType = MainConstants.TestType.Kpi.TEST_OOBE;
-        if (testArg.equals("testsearch"))
+        if (testArg.equals("testSearch"))
             detectedTestType = MainConstants.TestType.Kpi.TEST_SEARCH;
-        if (testArg.equals("testopenbook"))
+        if (testArg.equals("testOpenBook"))
             detectedTestType = MainConstants.TestType.Kpi.TEST_OPEN_BOOK;
+        if (testArg.equals("testOpenComics"))
+            detectedTestType = MainConstants.TestType.Kpi.TEST_OPEN_COMICS;
+        if (testArg.equals("testOpenMagazines"))
+            detectedTestType = MainConstants.TestType.Kpi.TEST_OPEN_MAGAZINES;
+        if (testArg.equals("testOpenWoodwing"))
+            detectedTestType = MainConstants.TestType.Kpi.TEST_OPEN_WOODWIN;
+        if (testArg.equals("testOpenFava"))
+            detectedTestType = MainConstants.TestType.Kpi.TEST_OPEN_FAVA;
+        if (testArg.equals("testOpenPdf"))
+            detectedTestType = MainConstants.TestType.Kpi.TEST_OPEN_PDF;
+        if (testArg.equals("testOpenNewspaper"))
+            detectedTestType = MainConstants.TestType.Kpi.TEST_OPEN_NEWSPAPER;
+        if (testArg.equals("testOpenCatalog"))
+            detectedTestType = MainConstants.TestType.Kpi.TEST_OPEN_CATALOG;
+        if (testArg.equals("testAllKpiBooks"))
+            detectedTestType = MainConstants.TestType.Kpi.TEST_ALL_KPI_BOOKS;
+
 
         return detectedTestType;
     }
 
+
     @Deprecated
     public static void stopTimer(){
         timer(false);
+    }
+
+    public static String getDeviceId() {
+        return deviceId;
+    }
+
+    public static String getBuildName() {
+        return buildName;
+    }
+
+    public static String getNetwork() {
+        return network;
+    }
+
+    public static String getOs_system() {
+        return os_system;
+    }
+
+    public static String getHwDevice() {
+        return hwDevice;
+    }
+
+    public static String getOsDevice() {
+        return osDevice;
+    }
+
+    public static String getDumpKpiInfo() {
+        return dumpKpiInfo;
+    }
+
+    public static String getAccount() {
+        return account;
+    }
+
+    public static String getPassword() {
+        return password;
+    }
+
+    public static int getTimeout() {
+        return timeout;
     }
 
 }

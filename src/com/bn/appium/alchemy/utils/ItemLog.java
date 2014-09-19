@@ -1,7 +1,6 @@
 package com.bn.appium.alchemy.utils;
 
 import com.bn.appium.alchemy.manager.TestManager;
-import net.bugs.testhelper.TestHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -51,9 +50,7 @@ public class ItemLog {
     String testCycleFieldName = null;
     PropertiesManager propertiesManager;
 
-    private TestHelper testHelper;
-
-    public ItemLog(TestHelper testHelper) {
+    public ItemLog() {
         propertiesManager = TestManager.configManager.getPropertiesManager();
         dateFieldName = propertiesManager.getProperty(ConfigurationParametersEnum.DATE_FIELD_NAME.name());
         dateFieldName = dateFieldName == null ? "Date=" : dateFieldName.trim();
@@ -112,7 +109,6 @@ public class ItemLog {
         testCycleFieldName = propertiesManager.getProperty(ConfigurationParametersEnum.TEST_CYCLE_FIELD_NAME.name());
         testCycleFieldName = testCycleFieldName == null ? "TestCycle=" : testCycleFieldName.trim();
 
-        this.testHelper = testHelper;
     }
 
     public String getDate() {
@@ -276,11 +272,6 @@ public class ItemLog {
             this.totalTime = time;
         else
             this.totalTime = this.endTime - this.startTime;
-
-        if(testHelper != null) {
-            testHelper.i("Total time:" + (this.endTime - this.startTime));
-            testHelper.i("Accuracy total time:" + (this.endTime - this.startTime - accuracy / 2));
-        }
     }
 
     public void setTestResult(boolean testResult) {

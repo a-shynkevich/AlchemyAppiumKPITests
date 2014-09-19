@@ -5,29 +5,31 @@ import com.bn.appium.alchemy.utils.ConfigurationParametersEnum;
 import com.bn.appium.alchemy.utils.MainConstants;
 import com.bn.appium.alchemy.utils.TestHelper;
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.TouchAction;
+import org.json.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by ashynkevich on 9/15/14.
  */
 public class TestSearch extends TestHelper {
+    String searchBook;
     public TestSearch(AppiumDriver driver) {
         super(driver);
+
     }
 
-    public void searchBook() {
+    int maxLoadTime = Integer.parseInt(TestManager.configManager.getProperty(ConfigurationParametersEnum.MAX_LOAD_TIME.name().toString()));
+
+    public boolean searchBook(String searchBook) {
         MainConstants.TEST_NAME = MainConstants.TestType.testSearch;
         log("start testSearch");
 
         WebElement webElement;
-
-        By menuBtn = By.xpath("//UIAApplication[1]/UIAWindow[1]/UIAToolbar[1]/UIAButton[1]");
-        webElement = waitForElement(menuBtn, 5000, true);
+        By byChild = By.className("UIAButton");
+        webElement = waitElementByLabel(byChild, "com.bn hub hamburger menu", 15000);
         if (webElement != null) {
             log("click \"com.bn hub hamburger menu\" button");
             webElement.click();
@@ -39,14 +41,14 @@ public class TestSearch extends TestHelper {
             webElement.click();
         }
         By searchField = By.className("UIASearchBar");
-        if (TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_DEVICE.name().toLowerCase()).contains("ipad")) {
+        if (TestManager.getHwDevice().toLowerCase().contains("ipad")) {
             webElement = waitForElement(searchField, 10000, true);
             if (webElement != null) {
                 log("enter book name into \"Search\" field.");
                 webElement.clear();
-                webElement.sendKeys(TestManager.configManager.getProperty(ConfigurationParametersEnum.BOOK_NAME.name()));
+                webElement.sendKeys(searchBook);
             }
-        } else {
+        }else {
             webElement = waitForElement(By.name("Search"), 10000, true);
             if (webElement != null) {
                 webElement.click();
@@ -54,17 +56,15 @@ public class TestSearch extends TestHelper {
                 if (webElement != null) {
                     log("enter book name into \"Search\" field.");
                     webElement.clear();
-                    webElement.sendKeys(TestManager.configManager.getProperty(ConfigurationParametersEnum.BOOK_NAME.name()));
+                    webElement.sendKeys(searchBook);
                 }
             }
         }
 
-
-
-        if (TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_DEVICE.name().toLowerCase()).contains("ipad")) {
+        if (TestManager.getHwDevice().toLowerCase().contains("ipad")) {
             webElement = waitForElement(By.name("Search"), 5000, true);
         }else {
-            webElement = waitForElement(By.name("Search"), 1, 5000);
+            webElement = waitForElement(By.name("Search"), 1, 5000, true);
         }
         if (webElement != null) {
             log("click Search");
@@ -72,54 +72,61 @@ public class TestSearch extends TestHelper {
             TestManager.startTimer();
         }
 
+        boolean isFirstSyncPassed = false;
+        By byParent = By.className("UIACollectionView");
+        WebElement uiCollectionView = waitForElement(byParent, 15000, false);
+        if (uiCollectionView != null){
+             byChild = By.className("UIACollectionCell");
+            if(waitChildOfElement(byParent, byChild, 20000)){
+                TestManager.stopTimer(false);
+                TestManager.write(TestManager.addLogParams(new Date(), MainConstants.TestType.Kpi.TestAction.FIRTS_SEARCH_SYNC, searchBook, true));
+                isFirstSyncPassed = true;
+            }
+        }
+
+        if (isFirstSyncPassed != true){
+            TestManager.write(TestManager.addLogParams(new Date(), MainConstants.TestType.Kpi.TestAction.FIRTS_SEARCH_SYNC, searchBook, false));
+            TestManager.write(TestManager.addLogParams(new Date(), MainConstants.TestType.Kpi.TestAction.FULL_SEARCH_SYNC, searchBook, false));
+            returnDefaultState();
+            return false;
+        }
+
+
         boolean isExceedWaitingOfElement = false;
         By networkStatusBar = By.name("Network connection in progress");
 
         TestManager.stopTimer(false);
         while (waitForElement(networkStatusBar, 5000, true) != null) {
-            if (waitWhileElementExist(networkStatusBar, 120000)) {
+            if (waitWhileElementExist(networkStatusBar, TestManager.getTimeout())) {
                 TestManager.stopTimer(false);
             } else {
                 isExceedWaitingOfElement = true;
-                TestManager.write(TestManager.addLogParams(new Date(), MainConstants.TestType.Kpi.TestAction.FULL_SYNC, Constant.Account.ACCOUNT, false));
-                break;
+                TestManager.write(TestManager.addLogParams(new Date(), MainConstants.TestType.Kpi.TestAction.FULL_SEARCH_SYNC, searchBook, false));
+                return false;
             }
         }
 
         if (!isExceedWaitingOfElement) {
-            TestManager.write(TestManager.addLogParams(new Date(), MainConstants.TestType.Kpi.TestAction.SEARCH, Constant.Account.ACCOUNT, true));
+            TestManager.write(TestManager.addLogParams(new Date(), MainConstants.TestType.Kpi.TestAction.FULL_SEARCH_SYNC, searchBook, true));
         }
-
+        return true;
     }
 
-    public void goToHome() {
+    public void returnDefaultState() {
         WebElement webElement = null;
 
-        if (TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_DEVICE.name().toLowerCase()).contains("ipad")) {
-            webElement = waitForElement(By.className("UIAButton"), 7, 5000);
+        if (TestManager.getHwDevice().toLowerCase().contains("ipad")) {
+            webElement = waitForElement(By.className("UIAButton"), 7, 5000, true);
             if (webElement != null) {
                 log("Close search.");
                 webElement.click();
             }
         } else {
-            webElement = waitForElement(By.name("Cancel"), 1, 5000);
+            webElement = waitForElement(By.name("Cancel"), 1, 5000, true);
             if (webElement != null) {
                 log("Close search.");
                 webElement.click();
             }
-        }
-
-        By menuBtn = By.xpath("//UIAApplication[1]/UIAWindow[1]/UIAToolbar[2]/UIAButton[1]");
-        webElement = waitForElement(menuBtn, 2000, true);
-        if (webElement != null) {
-            log("click \"com.bn hub hamburger menu\" button");
-            webElement.click();
-        }
-
-        webElement = waitForElement(By.name("Home"), 5000, true);
-        if (webElement != null) {
-            log("open Home screen");
-            webElement.click();
         }
     }
 }

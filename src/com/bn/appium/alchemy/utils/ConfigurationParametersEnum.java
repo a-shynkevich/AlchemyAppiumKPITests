@@ -7,8 +7,8 @@ public enum ConfigurationParametersEnum {
     MOBILE_PLATFORM,
 
 
-    IOS_APP_DIR,
-    IOS_APP,
+    BUILD_DIR,
+    BUILD_NAME,
     IOS_PLATFORM_VERSION,
     IOS_PLATFORM_NAME,
     IOS_APP_PACKAGE,
@@ -22,8 +22,38 @@ public enum ConfigurationParametersEnum {
     TIMEOUT,
     SYNC_COMPLETE,
 
-    BOOK_NAME,
+    SEARCH_BOOK_NAME,
     LOAD_BOOK_NAME,
+    MAX_LOAD_TIME,
+
+    BOOK,
+    BOOK_SIZE,
+
+    DRP_CATALOG,
+    DRP_CATALOG_SIZE,
+
+
+    VIDEO_BOOK,
+    VIDEO_BOOK_SIZE,
+
+    DRP_MAGAZINE,
+    MAGAZINE_SIZE,
+
+    PDF,
+    PDF_SIZE,
+
+    WOODWIN_MAGAZINE,
+    WOODWIN_SIZE,
+
+    DRP_COMICS,
+    DRP_COMICS_SIZE,
+
+    NEWSPAPER,
+    NEWSPAPER_SIZE,
+
+    EPIB,
+    EPIB_SIZE,
+
     DATE_FIELD_NAME,
     TIME_FIELD_NAME,
     BUILD_FIELD_NAME,
@@ -42,6 +72,8 @@ public enum ConfigurationParametersEnum {
     END_TIME_FIELD_NAME,
     TOTAL_TIME_FIELD_NAME,
     TEST_RESULT_FIELD_NAME,
-    TEST_CYCLE_FIELD_NAME, ConfigurationParametersEnum;
+    TEST_CYCLE_FIELD_NAME,
+    DUMP_KPI_INFO,
+    ConfigurationParametersEnum;
 
 }

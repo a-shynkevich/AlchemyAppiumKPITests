@@ -4,23 +4,18 @@ import com.bn.appium.alchemy.utils.*;
 import com.bn.appium.alchemy.manager.TestManager;
 import io.appium.java_client.AppiumDriver;
 import org.openqa.selenium.*;
+import sun.org.mozilla.javascript.internal.ast.WhileLoop;
+
 import java.util.Date;
+import java.util.List;
 
 public class TestOobe extends TestHelper {
     private Process process;
+    int maxLoadTime = Integer.parseInt(TestManager.configManager.getProperty(ConfigurationParametersEnum.MAX_LOAD_TIME.name().toString()));
 
     public TestOobe(AppiumDriver driver) {
         super(driver);
     }
-
-    private Point getCenter(WebElement element) {
-
-        Point upperLeft = element.getLocation();
-        Dimension dimensions = element.getSize();
-        return new Point(upperLeft.getX() + dimensions.getWidth()/2, upperLeft.getY() + dimensions.getHeight()/2);
-    }
-
-
 
     public void logOut() {
         WebElement webElement;
@@ -71,9 +66,8 @@ public class TestOobe extends TestHelper {
             log("input pasword: *****");
             secureEditText.sendKeys(TestManager.configManager.getProperty(ConfigurationParametersEnum.PASSWORD.name()) + "\n");
         }
-
-        if (TestManager.configManager.getProperty(ConfigurationParametersEnum.IOS_DEVICE.name()).toLowerCase().contains("iphone")) {
-            WebElement signInBtn = waitForElement(By.name("Sign In"), 3000, true);
+        if (TestManager.getHwDevice().toLowerCase().contains("iphone")) {
+            WebElement signInBtn = waitForElement(By.name("Sign In"), 5000, false);
             if (signInBtn != null) {
                 signInBtn.click();
             }
@@ -82,13 +76,20 @@ public class TestOobe extends TestHelper {
 
         TestManager.startTimer();
 
-        WebElement freeSample = waitForElement(By.name("Free Sample"), 120000, false);
-        if(freeSample != null){
-            TestManager.stopTimer(false);
-            TestManager.write(TestManager.addLogParams(new Date(), MainConstants.TestType.Kpi.TestAction.FIRST_SYNC, Constant.Account.ACCOUNT, true));
-        }else {
-            log("\"Free Sample\" button is not found");
-            TestManager.write(TestManager.addLogParams(new Date(), MainConstants.TestType.Kpi.TestAction.FIRST_SYNC, Constant.Account.ACCOUNT, false));
+        boolean isFirstSyncPassed = false;
+        By byParent = By.className("UIACollectionView");
+        WebElement uiCollectionView = waitForElement(byParent, 15000, false);
+        if (uiCollectionView != null){
+            By byChild = By.className("UIACollectionCell");
+            if(waitChildOfElement(byParent, byChild, TestManager.getTimeout())){
+                TestManager.stopTimer(false);
+                TestManager.write(TestManager.addLogParams(new Date(), MainConstants.TestType.Kpi.TestAction.FIRST_SYNC, "Sign in", true));
+                isFirstSyncPassed = true;
+            }
+        }
+
+        if (isFirstSyncPassed != true){
+            TestManager.write(TestManager.addLogParams(new Date(), MainConstants.TestType.Kpi.TestAction.FIRST_SYNC, "Sign in", false));
         }
 
         By networkStatusBar = By.name("Network connection in progress");
@@ -100,14 +101,12 @@ public class TestOobe extends TestHelper {
                 TestManager.stopTimer(false);
             }else {
                 isExceedWaitingOfElement = true;
-                TestManager.write(TestManager.addLogParams(new Date(), MainConstants.TestType.Kpi.TestAction.FULL_SYNC, Constant.Account.ACCOUNT, false));
+                TestManager.write(TestManager.addLogParams(new Date(), MainConstants.TestType.Kpi.TestAction.FULL_SYNC, "Sign in", false));
                 break;
             }
         }
 
         if (!isExceedWaitingOfElement)
-            TestManager.write(TestManager.addLogParams(new Date(), MainConstants.TestType.Kpi.TestAction.FULL_SYNC, Constant.Account.ACCOUNT, true));
+            TestManager.write(TestManager.addLogParams(new Date(), MainConstants.TestType.Kpi.TestAction.FULL_SYNC, "Sign in", true));
     }
-
-
 }
