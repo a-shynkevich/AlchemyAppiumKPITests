@@ -224,6 +224,8 @@ public class TestManager {
             detectedTestType = MainConstants.TestType.Kpi.TEST_OPEN_CATALOG;
         if (testArg.equals("testAllKpiBooks"))
             detectedTestType = MainConstants.TestType.Kpi.TEST_ALL_KPI_BOOKS;
+        if (testArg.equals("testDefferedSignIn"))
+            detectedTestType = MainConstants.TestType.Kpi.TEST_DEFFERED_SIGN_IN;
 
 
         return detectedTestType;

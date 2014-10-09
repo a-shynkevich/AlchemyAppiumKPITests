@@ -5,17 +5,21 @@ import com.bn.appium.alchemy.utils.ConfigurationParametersEnum;
 import com.bn.appium.alchemy.utils.MainConstants;
 import com.bn.appium.alchemy.utils.TestHelper;
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.TouchAction;
 import org.json.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by ashynkevich on 9/15/14.
  */
 public class TestSearch extends TestHelper {
     String searchBook;
+    By byChild;
     public TestSearch(AppiumDriver driver) {
         super(driver);
 
@@ -27,32 +31,26 @@ public class TestSearch extends TestHelper {
         MainConstants.TEST_NAME = MainConstants.TestType.testSearch;
         log("start testSearch");
 
-        WebElement webElement;
-        By byChild = By.className("UIAButton");
-        webElement = waitElementByLabel(byChild, "com.bn hub hamburger menu", 15000);
-        if (webElement != null) {
-            log("click \"com.bn hub hamburger menu\" button");
-            webElement.click();
-        }
+        openMenu();
+        openMenuTab("Library");
 
-        webElement = waitForElement(By.name("Library"), 5000, true);
-        if (webElement != null) {
-            log("open Library screen");
-            webElement.click();
-        }
+        WebElement webElement;
+
         By searchField = By.className("UIASearchBar");
         if (TestManager.getHwDevice().toLowerCase().contains("ipad")) {
-            webElement = waitForElement(searchField, 10000, true);
+            webElement = waitForElement(searchField, 0, 10000, false);
             if (webElement != null) {
                 log("enter book name into \"Search\" field.");
                 webElement.clear();
                 webElement.sendKeys(searchBook);
             }
         }else {
-            webElement = waitForElement(By.name("Search"), 10000, true);
+            webElement = waitForElement(By.name("Search"), 10000, false);
             if (webElement != null) {
-                webElement.click();
-                webElement = waitForElement(searchField, 10000, true);
+                Point point = getCenter(webElement);
+                new TouchAction(driver).tap(point.getX(), point.getY()-10).perform();
+
+                webElement = waitForElement(By.className("UIASearchBar"), 0, 5000, false);
                 if (webElement != null) {
                     log("enter book name into \"Search\" field.");
                     webElement.clear();
@@ -110,6 +108,39 @@ public class TestSearch extends TestHelper {
             TestManager.write(TestManager.addLogParams(new Date(), MainConstants.TestType.Kpi.TestAction.FULL_SEARCH_SYNC, searchBook, true));
         }
         return true;
+    }
+
+    public void openMenuTab(String tabName) {
+        WebElement webElement;
+
+        if (TestManager.getHwDevice().toLowerCase().contains("ipad")) {
+            webElement = waitForElement(By.name(tabName), 5000, true);
+        }else {
+            webElement = waitForElement(By.name(tabName), 5000, false);
+
+        }
+        if (webElement != null) {
+            log("open " + tabName + " screen");
+            webElement.click();
+            sleep(3000);
+        }
+    }
+
+    public void openMenu() {
+        WebElement webElement;
+        if (TestManager.getHwDevice().toLowerCase().contains("ipad")) {
+            webElement = waitForElement(By.name("com.bn hub hamburger menu"), 0, 15000, true);
+            if (webElement == null){
+                log("\"com.bn hub hamburger menu\" button == NULL");
+            }else {
+                log("click \"com.bn hub hamburger menu\" button");
+                webElement.click();
+            }
+        }else{
+            webElement = waitForElement(By.name("com.bn hub hamburger menu"), 0, 15000, false);
+            Point point = getCenter(webElement);
+            new TouchAction(driver).tap(point.getX(), point.getY()).perform();
+        }
     }
 
     public void returnDefaultState() {

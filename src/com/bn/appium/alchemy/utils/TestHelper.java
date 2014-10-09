@@ -18,10 +18,10 @@ import java.util.List;
  */
 public class TestHelper {
 
-    private static final int SWIPE_LEFT = -1;
-    private static final int SWIPE_RIGHT = 0;
-    private static final int SWIPE_DOWN = 1;
-    private static final int SWIPE_UP = 2;
+    protected static final int SWIPE_LEFT = -1;
+    protected static final int SWIPE_RIGHT = 0;
+    protected static final int SWIPE_DOWN = 1;
+    protected static final int SWIPE_UP = 2;
 
     public TestHelper (AppiumDriver driver) {
         this.driver = driver;
@@ -308,4 +308,18 @@ public class TestHelper {
         }
         return true;
     }
+    //    public void scroll(Map<String, Double> scrollMap){
+//        JavascriptExecutor js= (JavascriptExecutor) driver;
+//        js.executeScript("mobile: scroll", scrollMap);
+//    }
+//    public void scroll(String direction){
+//        JavascriptExecutor js= (JavascriptExecutor) driver;
+//        Map<String, String>scrollMap =new HashMap<String, String>();
+//        scrollMap.put("direction", direction);
+//        js.executeScript("mobile: scroll", scrollMap);
+//    }
+//    public void scroll(WebElement element){
+//        JavascriptExecutor js= (JavascriptExecutor) driver;
+//        js.executeScript("mobile: scrollTo", element);
+//    }
 }

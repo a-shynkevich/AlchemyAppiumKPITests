@@ -21,6 +21,7 @@ public class MainConstants {
         public static final String testOobe = "testOobe";
         public static final String testSearch = "testSearch";
         public static final String testOpenBook = "testOpenBook";
+        public static final String testDefferedSignIn = "testDefferedSignIn";
 
         public static class Kpi {
             public static final String[] allTests = new String[]{
@@ -40,13 +41,16 @@ public class MainConstants {
             public static final int TEST_OPEN_PDF = 7;
             public static final int TEST_OPEN_NEWSPAPER = 8;
             public static final int TEST_OPEN_CATALOG = 9;
-            public static final int TEST_ALL_KPI_BOOKS =10;
+            public static final int TEST_ALL_KPI_BOOKS = 10;
+            public static final int TEST_DEFFERED_SIGN_IN = 11;
 
 
 
 
 
             public class TestAction {
+                public static final String DEF_FIRST_SYNC = "DefferedFirstSync";
+                public static final String DEF_FULL_SYNC = "DefferedFullSync";
                 public static final String FIRST_SYNC = "FirstSync";
                 public static final String FULL_SYNC = "FullSync";
                 public static final String FIRTS_SEARCH_SYNC = "FirstSearchSync";

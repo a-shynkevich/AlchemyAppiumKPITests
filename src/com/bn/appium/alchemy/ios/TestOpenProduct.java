@@ -56,6 +56,7 @@ public class TestOpenProduct extends TestHelper {
 
         driver.hideKeyboard();
 
+        sleep(3000);
         By allListOfBooks = By.className("UIACollectionCell");
         webElement = waitForElement(allListOfBooks, 0, 10000, true);
         if (webElement != null) {
@@ -143,23 +144,21 @@ public class TestOpenProduct extends TestHelper {
 
                 Point point = getCenter(window);
                 new TouchAction(driver).tap(point.getX(), point.getY()).perform();
-                By byChild = By.className("UIAButton");
+
+
+
                 if(TestManager.getHwDevice().toLowerCase().contains("ipad")) {
-                    webElement = waitElementByLabel(byChild, "library", 15000);
+                    webElement = waitForElement(By.name("Library"), 0, 5000, false);
                     if (webElement != null) {
                         log("click \"Back\" button");
                         webElement.click();
                     }
                 }else {
-
-                    List<WebElement> elements = findElements(By.name("library"));
-                    for (int i = 0; i<elements.size(); i++){
-                        log(i+" element"+elements.get(i).getText());
-                    }
-                    webElement = waitForElement(By.name("library"), 5000, true);
+                    webElement = waitForElement(By.name("library"), 5000, false);
                     if (webElement != null) {
                         log("click \"Back\" button");
                         webElement.click();
+                        sleep(2000);
                     }
                 }
                 break;
@@ -167,17 +166,12 @@ public class TestOpenProduct extends TestHelper {
         }
 
         if (TestManager.getHwDevice().toLowerCase().contains("ipad")) {
-            By searchField = By.className("UIASearchBar");
-            webElement = waitForElement(searchField, 10000, true);
+
+            webElement = waitForElement(By.name("Clear text"), 1, 10000, false);
             if (webElement != null) {
                 log("CLear search.");
-                webElement.clear();
-            }
-        } else {
-            webElement = waitForElement(By.name("Cancel"), 5000, true);
-            if (webElement != null) {
-                log("Close search.");
                 webElement.click();
+                sleep(3000);
             }
         }
     }
@@ -185,18 +179,20 @@ public class TestOpenProduct extends TestHelper {
 
         WebElement webElement = null;
 
-        webElement = waitForElement(By.name("Close"), 6000, true);
+
+        webElement = waitForElement(By.name("com.bn.NookApplication.btn bac"), 15000, false);
         if(webElement != null){
             log("Click Close.");
             webElement.click();
+            sleep(3000);
         }
 
         if (TestManager.getHwDevice().toLowerCase().contains("ipad")) {
-            By searchField = By.className("UIASearchBar");
-            webElement = waitForElement(searchField, 3, 6000, true);
+            webElement = waitForElement(By.name("Clear text"), 1, 10000, false);
             if (webElement != null) {
                 log("CLear search.");
-                webElement.clear();
+                webElement.click();
+                sleep(3000);
             }
         } else {
 
@@ -204,6 +200,7 @@ public class TestOpenProduct extends TestHelper {
             if (webElement != null) {
                 log("Close search.");
                 webElement.click();
+                sleep(4000);
             }
         }
     }

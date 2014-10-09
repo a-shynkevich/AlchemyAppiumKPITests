@@ -1,9 +1,6 @@
 package com.bn.appium.alchemy;
 
-import com.bn.appium.alchemy.ios.TestAllKpiBooks;
-import com.bn.appium.alchemy.ios.TestOpenProduct;
-import com.bn.appium.alchemy.ios.TestOobe;
-import com.bn.appium.alchemy.ios.TestSearch;
+import com.bn.appium.alchemy.ios.*;
 import com.bn.appium.alchemy.manager.TestManager;
 import com.bn.appium.alchemy.utils.ConfigurationParametersEnum;
 import com.bn.appium.alchemy.utils.InstallerTestParams;
@@ -64,6 +61,9 @@ public class Main {
                 break;
             case MainConstants.TestType.Kpi.TEST_OOBE:
                 (new TestOobe(driver)).login();
+                break;
+            case MainConstants.TestType.Kpi.TEST_DEFFERED_SIGN_IN:
+                (new TestDefferedSignIn(driver)).start();
                 break;
             case MainConstants.TestType.Kpi.TEST_SEARCH:
                 (new TestSearch(driver)).searchBook(TestManager.configManager.getProperty(ConfigurationParametersEnum.SEARCH_BOOK_NAME.name()));
